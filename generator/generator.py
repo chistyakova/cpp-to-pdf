@@ -1,6 +1,7 @@
 import os
 import re
-
+import sys
+from enum import Enum, auto
 
 def readfile(file_path):
     try:
@@ -17,9 +18,8 @@ def readfile(file_path):
     return contents
 
 
-generators = []
-structs = {}
-vectors = {}
+generators = []  # Сохраняем найденные во всех *.cpp вызовы json_auto_generator_, которые будем потом генерировать
+structs = {}  # Словарь вида ИМЯ_СТРУКТУРЫ:СТРУКТУРА
 
 
 for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
@@ -35,16 +35,18 @@ for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
                     generators.append(match)
             if file_path.endswith('.h') or file_path.endswith('.hpp'):
                 lines = contents.split('\n')
-                current_struct = ''
+                current_struct_name = ''
                 for line in lines:
                     if line.startswith('struct'):
                         if ';' in line:
                             continue  # Пропускаем объявление класса class IntegralForm;
-                        current_struct = line.split()[1]
-                        structs[current_struct] = []
-                    if ';' in line and '(' not in line and ')' not in line and '}' not in line and current_struct:
+                        current_struct_name = line.split()[1]
+                        structs[current_struct_name] = {'type': 'own', 'data': []}
+                    if ';' in line and '(' not in line and ')' not in line and '}' not in line and current_struct_name:
                         line = line.split(';', 1)[0]
-                        structs[current_struct].append(line)
+                        structs[current_struct_name]['data'].append(line)
+                    if line.startswith('typedef std::vector'):
+                        structs[line.split()[-1].replace(';', '')] = {'type': 'std_vector', 'data': line[line.find('<')+1:line.find('>')].strip()}
 
 for generator in generators:
     struct_name = generator.split('(')[0]
