@@ -38,13 +38,14 @@ for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
                 lines = contents.split('\n')
                 current_struct_name = ''
                 for line in lines:
+                    # Удаляем комментарии
+                    line = re.sub('//.*?\n|/\*.*?\*/', '', line, flags=re.S)
+
                     # Пропускаем...
                     if any(x in line for x in ['return ']):
                         continue  # ...строки содержащие подстроки
                     if not line.strip():
                         continue  # ...пустые строки
-                    if line.startswith(r'//'):
-                        continue  # ...строки-комментарии
 
                     # Попали в начало опеределения новой структуры...
                     if line.startswith('struct'):
