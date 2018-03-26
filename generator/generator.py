@@ -3,6 +3,7 @@ import re
 import sys
 from enum import Enum, auto
 
+
 def readfile(file_path):
     try:
         contents = open(file_path, encoding='cp1251').read()
@@ -38,7 +39,7 @@ for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
                 current_struct_name = ''
                 for line in lines:
                     # Пропускаем...
-                    if any(x in line for x in ['return ', ')', '(']):
+                    if any(x in line for x in ['return ']):
                         continue  # ...строки содержащие подстроки
                     if not line.strip():
                         continue  # ...пустые строки
@@ -50,19 +51,16 @@ for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
                         if ';' in line:
                             continue  # (это оказалось Forward declaration - пропускаем эту строку)
                         current_struct_name = line.split()[1]  # ...запоминаем имя текущей стркутуры
-                        structs[current_struct_name] = (None, [])
-                    elif current_struct_name != '':
-                        if ';' in line and len(line.split()) > 1:  # В line теперь определение поля струтуры
-                            print('--------' + current_struct_name)
-                            line = line.split(';', 1)[0].strip()
-
-                            structs[current_struct_name][1].append(line)
-                        elif '(' in line:
-                            print('!!!!!!!!!'+current_struct_name)
+                        structs[current_struct_name] = []
+                    elif current_struct_name:
+                        if '(' in line or '};' in line:
                             current_struct_name = ''
-                    if line.startswith('typedef std::vector'):
-                        print('****** '+current_struct_name+' '+line)
-                        structs[line.split()[-1].replace(';', '')] = ('std::vector', line[line.find('<')+1:line.find('>')].strip())
+                        elif ';' in line:  # В line теперь определение поля струтуры
+                            line = line.split(';', 1)[0].strip().replace('\t', ' ')
+                            structs[current_struct_name].append(line)
+                    elif line.startswith('typedef std::vector'):
+                        structs[line.split()[-1].replace(';', '')] = line.replace('typedef ', '').replace(';', '')
+                        #line[line.find('<')+1:line.find('>')].strip()
 
 
 def recurse_into(struct_name):
@@ -70,15 +68,19 @@ def recurse_into(struct_name):
     depth += 1
     if struct_name not in structs:
         print('*** Не найдена стуктура %s' % struct_name)
-    tab = '-' * depth
-    print(tab + struct_name)
-    if not structs[struct_name][0]:  # Нестандартный тип
-        for param in structs[struct_name][1]:
-            print(tab+param)
+    tab = ' ' * depth
+    if not type(structs[struct_name]) == str:  # Нестандартный тип
+        print(tab + struct_name)
+        for param in structs[struct_name]:
+            splits = param.rsplit(' ', 1)
+            param_name = splits[1]
+            param_type = splits[0]
+            print(tab*2 + param_type + ' ' + param_name)
     else:  # Стандартный тип
-        print('standard')
+        print(tab + struct_name+' '+structs[struct_name])
 
 
 for generator in generators:
     depth = 0
+    print('---')
     recurse_into(generator.split('(')[0])
