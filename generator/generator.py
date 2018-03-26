@@ -37,19 +37,48 @@ for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
                 lines = contents.split('\n')
                 current_struct_name = ''
                 for line in lines:
+                    # Пропускаем...
+                    if any(x in line for x in ['return ', ')', '(']):
+                        continue  # ...строки содержащие подстроки
+                    if not line.strip():
+                        continue  # ...пустые строки
+                    if line.startswith(r'//'):
+                        continue  # ...строки-комментарии
+
+                    # Попали в начало опеределения новой структуры...
                     if line.startswith('struct'):
                         if ';' in line:
-                            continue  # Пропускаем объявление класса class IntegralForm;
-                        current_struct_name = line.split()[1]
-                        structs[current_struct_name] = {'type': 'own', 'data': []}
-                    if ';' in line and '(' not in line and ')' not in line and '}' not in line and current_struct_name:
-                        line = line.split(';', 1)[0]
-                        structs[current_struct_name]['data'].append(line)
+                            continue  # (это оказалось Forward declaration - пропускаем эту строку)
+                        current_struct_name = line.split()[1]  # ...запоминаем имя текущей стркутуры
+                        structs[current_struct_name] = (None, [])
+                    elif current_struct_name != '':
+                        if ';' in line and len(line.split()) > 1:  # В line теперь определение поля струтуры
+                            print('--------' + current_struct_name)
+                            line = line.split(';', 1)[0].strip()
+
+                            structs[current_struct_name][1].append(line)
+                        elif '(' in line:
+                            print('!!!!!!!!!'+current_struct_name)
+                            current_struct_name = ''
                     if line.startswith('typedef std::vector'):
-                        structs[line.split()[-1].replace(';', '')] = {'type': 'std_vector', 'data': line[line.find('<')+1:line.find('>')].strip()}
+                        print('****** '+current_struct_name+' '+line)
+                        structs[line.split()[-1].replace(';', '')] = ('std::vector', line[line.find('<')+1:line.find('>')].strip())
+
+
+def recurse_into(struct_name):
+    global depth
+    depth += 1
+    if struct_name not in structs:
+        print('*** Не найдена стуктура %s' % struct_name)
+    tab = '-' * depth
+    print(tab + struct_name)
+    if not structs[struct_name][0]:  # Нестандартный тип
+        for param in structs[struct_name][1]:
+            print(tab+param)
+    else:  # Стандартный тип
+        print('standard')
+
 
 for generator in generators:
-    struct_name = generator.split('(')[0]
-    if struct_name not in structs:
-        print('Не найдена стуктура %s' % struct_name)
-    print(structs[struct_name])
+    depth = 0
+    recurse_into(generator.split('(')[0])
