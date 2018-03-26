@@ -1,0 +1,33 @@
+#editor {			//левая панель
+	position: absolute;
+	top: 0px;
+	right: 50%;
+	left: 0;
+	width: 20%;
+	height: 100%;
+	background-color: rgb(200,200,200);
+}
+
+@media(min-width: 1001px) {
+	.playgroundBody .content {
+		position: fixed;
+		display: block;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		top: 0;
+	}
+
+	#pdfV {
+		left: 20%;
+		width: 80%;
+		height: 100%;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		position: absolute;
+	}
+	.playgroundBody .notEnoughSpace {
+		display: none;
+	}
+}

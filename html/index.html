@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang='en'>
+<head>
+	<meta charset='utf-8'>
+	<title>my first pdfmake example</title>
+	<script src='pdfmake.min.js'></script>
+	<script src='vfs_fonts.js'></script>
+    <script src='jquery.js'></script>
+    <link rel='stylesheet' href='styles.css'>
+</head>
+<body>
+<div class='playgroundBody'>
+	<div class='notEnoughSpace'>
+		<div class='container'>
+			<h1>Playground does not make too much sense when horizontal resolution is below 300px</h1>
+		</div>
+	</div>
+	<div class='content'>
+		<div id='editor'>
+        Left pane<br>
+		Text1
+        <input type="checkbox" onclick="modify()"/><br>
+		Text2
+        <input type="checkbox" onclick="modify2()"/>
+        </div>
+		<iframe id='pdfV'></iframe>
+	</div>
+</div>
+<script type="text/javascript" charset="utf-8">
+// Примеры 
+// https://github.com/bpampuch/pdfmake
+// http://pdfmake.org/playground.html
+var json = (function () {
+    var json = null;
+    $.ajax({
+        'async': false,
+        'global': false,
+        'url': 'example.json',
+        'dataType': "json",
+        'success': function (data) {
+            json = data;
+        }
+    });
+    return json;
+})();
+
+var dd = { content: [] };
+
+var title = 'colontitule: '+json.colontitule+' name_pilot1: '+json.name_pilot1
+var table = { "table": { "body": json.violations } }
+var table2 = 
+{ 
+    "table": 
+    { 
+        "body": [[1,2,3,4,5,6],[2,2,2,2,2,2],[2,2,2,2,2,2],[4,4,4,4,'',4]]
+    }
+}
+
+dd.content.push(title)
+dd.content.push(table)
+dd.content.push(table2)
+
+function modify() {
+    table2.table.body.push([7,7,7,7,7,7])
+    generate()
+}
+
+function modify2() {
+    table2.table.body.push([9,9,9,9,9,9])
+    generate()
+}
+
+function generate() {
+				pdfMake.createPdf(dd).getDataUrl(function(outDoc) {
+					
+
+					document.getElementById('pdfV').src = outDoc;
+
+				});
+			}
+generate()
+</script>
+</body>
+</html>

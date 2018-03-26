@@ -1,0 +1,19 @@
+{
+	"colontitule": "05.03.2018",
+	"name_pilot1": "Visitor",
+	"name_pilot2": "-------",
+	"date": "06.03.2018",
+	"time_polet": "33",
+	"time_tren_start": "50065",
+	"time_tren_end": "50099",
+	"name_instructor": "",
+	"data_Estim": "",
+	"Mtime_start": "36000",
+	"Mtime_end": "36033",
+	"Sday": " ",
+	"Smeteo": " ",
+	"violations": [
+		["Maximum allowable g-load with flaps down is exceeded.", "1"],
+		["Maximum allowable speed with flaps down is exceeded.", "1"]
+	]
+}
