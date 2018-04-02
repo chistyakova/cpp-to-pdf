@@ -13,7 +13,7 @@ void WebServer::ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
         if      (mg_vcmp(&hm->uri, "/api/stop")  == 0) {  }
         else if (mg_vcmp(&hm->uri, "/api/status") == 0) {  }
         else {
-          mg_serve_http(nc, hm, WebServer::s_http_server_opts);
+          mg_serve_http(nc, hm, s_http_server_opts);
         }
         break;
       default:
