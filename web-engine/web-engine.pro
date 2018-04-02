@@ -1,9 +1,11 @@
 TEMPLATE = app
 
-QT += webenginewidgets
+QT += core widgets webenginewidgets
 
-SOURCES += main.cpp mongoose.c
-HEADERS += mongoose.h
+SOURCES += main.cpp mongoose.c \
+    webserver.cpp
+HEADERS += mongoose.h \
+    webserver.h
 
 win32:LIBS += -ladvapi32 -luser32
 
