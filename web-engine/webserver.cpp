@@ -10,8 +10,8 @@ void WebServer::ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
 
     switch (ev) {
       case MG_EV_HTTP_REQUEST:
-        if      (mg_vcmp(&hm->uri, "/api/stop")  == 0) {  }
-        else if (mg_vcmp(&hm->uri, "/api/status") == 0) {  }
+        if      (mg_vcmp(&hm->uri, "/api/request1")  == 0) { }
+        else if (mg_vcmp(&hm->uri, "/api/request2") == 0) {  }
         else {
           mg_serve_http(nc, hm, s_http_server_opts);
         }
@@ -22,10 +22,9 @@ void WebServer::ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
 }
 
 void WebServer::run() {
-
     struct mg_mgr mgr;
     struct mg_connection *nc;
-    std::string document_root = ".";
+    std::string document_root = "../html";
 
     chdir(document_root.c_str());
 
@@ -41,7 +40,7 @@ void WebServer::run() {
     mg_set_protocol_http_websocket(nc);
     s_http_server_opts.enable_directory_listing = "yes";
 
-    for (;;) {
+    while(true) {
       mg_mgr_poll(&mgr, 1000);
     }
     mg_mgr_free(&mgr);
