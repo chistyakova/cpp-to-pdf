@@ -1,4 +1,6 @@
 #include "webserver.h"
+#include <QFileInfo>
+#include <QCoreApplication>
 
 WebServer::WebServer()
 {
@@ -24,11 +26,9 @@ void WebServer::ev_handler(struct mg_connection *nc, int ev, void *ev_data) {
 void WebServer::run() {
     struct mg_mgr mgr;
     struct mg_connection *nc;
-    std::string document_root = "../html";
-
-    chdir(document_root.c_str());
-
-    s_http_server_opts.document_root = document_root.c_str();
+    QString document_root = QFileInfo(QCoreApplication::applicationFilePath()).absolutePath() + "/../html";
+    chdir(document_root.toStdString().c_str());
+    s_http_server_opts.document_root = ".";
 
     mg_mgr_init(&mgr, NULL);
     nc = mg_bind(&mgr, "8888", WebServer::ev_handler);
