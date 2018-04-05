@@ -40,9 +40,61 @@ See https://github.com/adobe-type-tools/cmap-resources
 
     <script src="viewer.js"></script>
 
+
+    <script src='/pdfmake.min.js'></script>
+    <script src='/vfs_fonts.js'></script>
+    <script src='/jquery.js'></script>
+
+
   </head>
 
   <body tabindex="1" class="loadingInProgress">
+    <div id="rmiPanel">
+    Панель RMI
+    <script type="text/javascript" charset="utf-8">
+    
+    
+    
+    var json = (function () {
+    var json = null;
+    $.ajax({
+        'async': false,
+        'global': false,
+        'url': '/example.json',
+        'dataType': "json",
+        'success': function (data) {
+            json = data;
+        }
+    });
+    return json;
+})();
+
+var dd = { content: [] };
+
+var title = 'colontitule: '+json.colontitule+' name_pilot1: '+json.name_pilot1
+var table = { "table": { "body": json.violations } }
+var table2 = 
+{ 
+    "table": 
+    { 
+        "body": [[1,2,3,4,5,6],[2,2,2,2,2,2],[2,2,2,2,2,2],[4,4,4,4,'',4]]
+    }
+}
+
+dd.content.push(title)
+dd.content.push(table)
+dd.content.push(table2)
+    
+    
+    
+    function generate() {
+        pdfMake.createPdf(dd).getBuffer(function(outDoc) {
+            PDFViewerApplication.open(outDoc)
+        });
+    }
+    generate()
+    </script>
+    </div>
     <div id="outerContainer">
 
       <div id="sidebarContainer">
