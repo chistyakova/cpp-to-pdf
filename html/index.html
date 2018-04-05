@@ -71,10 +71,11 @@ function modify2() {
 }
 
 function generate() {
-				pdfMake.createPdf(dd).getDataUrl(function(outDoc) {
+	//pdfMake.createPdf(dd).getDataUrl(function(outDoc) {
+				pdfMake.createPdf(dd).getBase64(function(outDoc) {
 					
-
-					document.getElementById('pdfV').src = outDoc;
+							alert(outDoc);
+					document.getElementById('pdfV').src = 'web/viewer.html?file='+outDoc;
 
 				});
 			}

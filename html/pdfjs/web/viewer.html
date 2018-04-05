@@ -50,7 +50,6 @@ See https://github.com/adobe-type-tools/cmap-resources
 
   <body tabindex="1" class="loadingInProgress">
     <div id="rmiPanel">
-    Панель RMI
     <script type="text/javascript" charset="utf-8">
     
     
@@ -92,8 +91,23 @@ dd.content.push(table2)
             PDFViewerApplication.open(outDoc)
         });
     }
+    
+    function modify() {
+    table2.table.body.push([7,7,7,7,7,7])
+    generate()
+    }
+
+	function modify2() {
+    table2.table.body.push([9,9,9,9,9,9])
+    generate()
+	}
+    
     generate()
     </script>
+    	Text1
+        <input type="checkbox" onclick="modify()"/><br>
+		Text2
+        <input type="checkbox" onclick="modify2()"/>
     </div>
     <div id="outerContainer">
 
