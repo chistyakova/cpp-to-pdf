@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import sys
@@ -33,9 +34,20 @@ def cpp_comment_remover(text):
     return re.sub(pattern, replacer, text)
 
 
-generators = []  # Сохраняем найденные во всех *.cpp вызовы json_auto_generator_, которые будем потом генерировать
-structs = {}  # Словарь вида ИМЯ_СТРУКТУРЫ:СТРУКТУРА
+# Сохраняем найденные во всех *.cpp вызовы json_auto_generator_, вида:
+# ['Trenaj_Mission(m_statistcs)', 'Violation_vector(m_violations)', 'File_Refuse(m_ref_datas)']
+generators = []
 
+'''
+{
+"TypeName":
+    {
+        "type":[own/enum/std::vector],
+        "value": зависит от "type"
+    }
+}
+'''
+structs = {}
 
 for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
     for name in files:
@@ -66,19 +78,23 @@ for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
                         if ';' in line:
                             continue  # (это оказалось Forward declaration - пропускаем эту строку)
                         current_struct_name = line.split()[1]  # ...запоминаем имя текущей стркутуры
-                        structs[current_struct_name] = []
+                        structs[current_struct_name] = {"type": "own", "value": []}
                     elif current_struct_name:
                         if '(' in line or '};' in line:
                             current_struct_name = ''
                         elif ';' in line:  # В line теперь определение поля струтуры
                             line = line.split(';', 1)[0].strip().replace('\t', ' ').replace('{', '')
-                            structs[current_struct_name].append(line)
+                            splits = line.rsplit(' ', 1)
+                            if len(splits) == 2:
+                                structs[current_struct_name]['value'].append({"type": splits[0], "name": splits[1]})
                     elif line.startswith('typedef std::vector'):
                         structs[line.split()[-1].replace(';', '')] = line.replace('typedef ', '').replace(';', '')
                     elif line.startswith('typedef st::types::byte'):
                         structs[line.split()[-1].replace(';', '')] = line.replace('typedef ', '').replace(';', '')
 
-
+print(generators)
+print(json.dumps(structs))  # Удобно смотреть в https://jsoneditoronline.org/
+sys.exit(1)
 def recurse_into(depth, fieled_type, fieled_name):
     tab = '\t' * depth
 
