@@ -49,7 +49,7 @@ generators = []
 '''
 structs = {}
 
-for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
+for root, dirs, files in os.walk(r'D:\svn\su30mki\branches\cpp-to-pdf\src'):
     for name in files:
         if name.startswith('ui_'):
             continue
@@ -74,10 +74,11 @@ for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
                         continue  # ...пустые строки
 
                     # Попали в начало опеределения новой структуры...
-                    if line.startswith('struct'):
+                    if line.startswith('struct '):
                         if ';' in line:
                             continue  # (это оказалось Forward declaration - пропускаем эту строку)
                         current_struct_name = line.split()[1]  # ...запоминаем имя текущей стркутуры
+
                         structs[current_struct_name] = {"type": "own", "value": []}
                     elif current_struct_name:
                         if '(' in line or '};' in line:
@@ -92,50 +93,52 @@ for root, dirs, files in os.walk(r'D:\tmp\cpp-to-json-generator\src'):
                     elif line.startswith('typedef st::types::byte'):
                         structs[line.split()[-1].replace(';', '')] = line.replace('typedef ', '').replace(';', '')
 
-print(generators)
-print(json.dumps(structs))  # Удобно смотреть в https://jsoneditoronline.org/
-sys.exit(1)
-def recurse_into(depth, fieled_type, fieled_name):
+#print(generators)
+#print(json.dumps(structs))  # Удобно смотреть в https://jsoneditoronline.org/
+
+
+def recurse_into(depth, field_type, field_name):
     tab = '\t' * depth
 
     # Сперва проверям тип на пренадлежность к стандартным
-    if fieled_type == 'unsigned int':
-        print(tab+'('+fieled_type+')'+fieled_name)
-    elif fieled_type == 'int':
-        print(tab + '(' + fieled_type + ')' + fieled_name)
-    elif fieled_type == 'std::string':
-        print(tab + '(' + fieled_type + ')' + fieled_name)
-    elif fieled_type == 'QString':
-        print(tab + '(' + fieled_type + ')' + fieled_name)
-    elif fieled_type == 'unsigned long':
-        print(tab + '(' + fieled_type + ')' + fieled_name)
-    elif fieled_type == 'char':
-        print(tab + '(' + fieled_type + ')' + fieled_name)
-    elif fieled_type == 'unsigned char':
-        print(tab + '(' + fieled_type + ')' + fieled_name)
-    elif fieled_type == 'float':
-        print(tab + '(' + fieled_type + ')' + fieled_name)
-    elif fieled_type == 'bool':
-        print(tab + '(' + fieled_type + ')' + fieled_name)
-    elif fieled_type.startswith('std::vector'):
+    if field_type == 'unsigned int':
+        print(tab+'('+field_type+')'+field_name)
+    elif field_type == 'int':
+        print(tab + '(' + field_type + ')' + field_name)
+    elif field_type == 'std::string':
+        print(tab + '(' + field_type + ')' + field_name)
+    elif field_type == 'QString':
+        print(tab + '(' + field_type + ')' + field_name)
+    elif field_type == 'unsigned long':
+        print(tab + '(' + field_type + ')' + field_name)
+    elif field_type == 'char':
+        print(tab + '(' + field_type + ')' + field_name)
+    elif field_type == 'unsigned char':
+        print(tab + '(' + field_type + ')' + field_name)
+    elif field_type == 'float':
+        print(tab + '(' + field_type + ')' + field_name)
+    elif field_type == 'bool':
+        print(tab + '(' + field_type + ')' + field_name)
+    elif field_type.startswith('std::vector'):
         print(tab + '[')
-        recurse_into(depth, fieled_type[fieled_type.find('<')+1:fieled_type.find('>')].strip(), fieled_name)
+        recurse_into(depth, field_type[field_type.find('<')+1:field_type.find('>')].strip(), field_name)
         print(tab + ']')
-    elif fieled_type in structs:
-        if not type(structs[fieled_type]) == str:
-            print(tab+'['+fieled_type+']'+fieled_name)
-            for param in structs[fieled_type]:
-                child_type = param.rsplit(' ', 1)[0].strip()
-                child_name = param.rsplit(' ', 1)[1].strip()
-                recurse_into(depth+1, child_type, child_name)
+    elif field_type in structs:
+        if not type(structs[field_type]) == str:
+            print(tab+'['+field_type+']'+field_name)
+            for param in structs[field_type]['value']:
+                print(param)
+                #child_type = param.rsplit(' ', 1)[0].strip()
+                #child_name = param.rsplit(' ', 1)[1].strip()
+                #recurse_into(depth+1, child_type, child_name)
         else:
-            print(tab + fieled_type + ' ! ' + structs[fieled_type])
+            print(tab + '!!! ' + field_type + ' ' + structs[field_type])
     else:
-        print('*** Не найдено привило для переменной "%s" типа "%s"' % (fieled_name, fieled_type))
+        print('*** Не найдено привило для переменной "%s" типа "%s"' % (field_name, field_type))
 
 
 for generator in generators:
-    print('---')
-    fieled_type = generator.split('(')[0]
-    fieled_name = generator.split('(')[1].replace(')','')
-    recurse_into(0, fieled_type, fieled_name)
+    print('--- генератор для: %s' % generator)
+    field_type = generator.split('(')[0]
+    field_name = generator.split('(')[1].replace(')','')
+    recurse_into(0, field_type, field_name)
