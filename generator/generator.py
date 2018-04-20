@@ -81,7 +81,8 @@ for root, dirs, files in os.walk(r'D:\svn\su30mki\branches\cpp-to-pdf'):
                         try:
                             current_struct_name = line.split()[1]  # ...запоминаем имя текущей стркутуры
                         except:
-                            print('exception at line %s: split line: "%s"' % (getframeinfo(currentframe()).lineno, line))
+                            print('exception at line %s: split line: "%s" from file "%s"'
+                                  % (getframeinfo(currentframe()).lineno, line, file_path))
                             current_struct_name = ''
                             continue
 
