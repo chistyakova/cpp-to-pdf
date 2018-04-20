@@ -3,6 +3,7 @@ import os
 import re
 import sys
 from enum import Enum, auto
+from inspect import currentframe, getframeinfo
 
 
 def readfile(file_path):
@@ -49,7 +50,7 @@ generators = []
 '''
 structs = {}
 
-for root, dirs, files in os.walk(r'D:\svn\su30mki\branches\cpp-to-pdf\src'):
+for root, dirs, files in os.walk(r'D:\svn\su30mki\branches\cpp-to-pdf'):
     for name in files:
         if name.startswith('ui_'):
             continue
@@ -77,7 +78,12 @@ for root, dirs, files in os.walk(r'D:\svn\su30mki\branches\cpp-to-pdf\src'):
                     if line.startswith('struct '):
                         if ';' in line:
                             continue  # (это оказалось Forward declaration - пропускаем эту строку)
-                        current_struct_name = line.split()[1]  # ...запоминаем имя текущей стркутуры
+                        try:
+                            current_struct_name = line.split()[1]  # ...запоминаем имя текущей стркутуры
+                        except:
+                            print('exception at line %s: split line: "%s"' % (getframeinfo(currentframe()).lineno, line))
+                            current_struct_name = ''
+                            continue
 
                         structs[current_struct_name] = {"type": "own", "value": []}
                     elif current_struct_name:
@@ -87,7 +93,7 @@ for root, dirs, files in os.walk(r'D:\svn\su30mki\branches\cpp-to-pdf\src'):
                             line = line.split(';', 1)[0].strip().replace('\t', ' ').replace('{', '')
                             splits = line.rsplit(' ', 1)
                             if len(splits) == 2:
-                                structs[current_struct_name]['value'].append({"type": splits[0], "name": splits[1]})
+                                structs[current_struct_name]['value'].append({"type": splits[0].strip(), "name": splits[1].strip()})
                     elif line.startswith('typedef std::vector'):
                         structs[line.split()[-1].replace(';', '')] = line.replace('typedef ', '').replace(';', '')
                     elif line.startswith('typedef st::types::byte'):
@@ -125,12 +131,11 @@ def recurse_into(depth, field_type, field_name):
         print(tab + ']')
     elif field_type in structs:
         if not type(structs[field_type]) == str:
-            print(tab+'['+field_type+']'+field_name)
-            for param in structs[field_type]['value']:
-                print(param)
+            #print(tab+'['+field_type+']'+field_name)
+            for v in structs[field_type]['value']:
                 #child_type = param.rsplit(' ', 1)[0].strip()
                 #child_name = param.rsplit(' ', 1)[1].strip()
-                #recurse_into(depth+1, child_type, child_name)
+                recurse_into(depth+1, v['type'], v['name'])
         else:
             print(tab + '!!! ' + field_type + ' ' + structs[field_type])
     else:
